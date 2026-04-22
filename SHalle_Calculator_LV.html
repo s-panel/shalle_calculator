@@ -1,0 +1,1440 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S HALLE — Angāra izmaksu kalkulators</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #1B3A6B;
+    --navy-dark: #122850;
+    --navy-light: #2a4f8f;
+    --orange: #E8500A;
+    --orange-light: #ff6a25;
+    --orange-pale: #fff3ee;
+    --white: #ffffff;
+    --gray-50: #f8f9fc;
+    --gray-100: #f0f2f8;
+    --gray-200: #dde2ef;
+    --gray-400: #8a94b2;
+    --gray-600: #4a5578;
+    --gray-800: #1e2a45;
+    --green: #0d9e6e;
+    --green-light: #e6f9f3;
+    --red: #d93f3f;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Barlow', sans-serif;
+    background: var(--gray-50);
+    color: var(--gray-800);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .calc-header {
+    background: var(--navy);
+    padding: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .calc-header::before {
+    content: '';
+    position: absolute;
+    right: -60px; top: -40px;
+    width: 340px; height: 340px;
+    background: rgba(232,80,10,0.12);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  .calc-header::after {
+    content: '';
+    position: absolute;
+    right: 60px; bottom: -80px;
+    width: 200px; height: 200px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  .header-inner {
+    max-width: 1060px;
+    margin: 0 auto;
+    padding: 36px 28px 32px;
+    position: relative;
+    z-index: 1;
+  }
+  .header-badge {
+    display: inline-block;
+    background: var(--orange);
+    color: #fff;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 2px;
+    margin-bottom: 12px;
+  }
+  .header-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 42px;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.05;
+    letter-spacing: -0.5px;
+  }
+  .header-title span { color: var(--orange); }
+  .header-sub {
+    margin-top: 8px;
+    color: rgba(255,255,255,0.55);
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 0.3px;
+  }
+
+  /* SNOW ZONE BAR */
+  .zone-bar {
+    background: var(--navy-dark);
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding: 0 28px;
+  }
+  .zone-bar-inner {
+    max-width: 1060px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 0;
+    flex-wrap: wrap;
+  }
+  .zone-label {
+    color: rgba(255,255,255,0.55);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-right: 6px;
+    white-space: nowrap;
+  }
+  .zone-btn {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,0.07);
+    border: 1.5px solid rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.7);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 8px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all .18s;
+    text-transform: uppercase;
+  }
+  .zone-btn:hover { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.25); }
+  .zone-btn.active {
+    background: var(--orange);
+    border-color: var(--orange);
+    color: #fff;
+  }
+  .zone-icon { font-size: 16px; }
+  .zone-desc {
+    margin-left: auto;
+    color: rgba(255,255,255,0.35);
+    font-size: 11px;
+  }
+
+  /* MAIN LAYOUT */
+  .calc-main {
+    max-width: 1060px;
+    margin: 0 auto;
+    padding: 32px 28px 48px;
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 24px;
+    align-items: start;
+  }
+
+  /* SECTIONS */
+  .section {
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid var(--gray-200);
+    margin-bottom: 20px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(27,58,107,0.06);
+  }
+  .section-head {
+    background: var(--navy);
+    padding: 13px 22px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-num {
+    background: var(--orange);
+    color: #fff;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 14px;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .section-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: #fff;
+  }
+  .section-body { padding: 22px; }
+
+  /* FORM GRID */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 22px; }
+  .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px 18px; }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-group.span2 { grid-column: span 2; }
+  .form-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--gray-400);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .form-label span { color: var(--orange); margin-left: 2px; }
+  .form-control {
+    border: 1.5px solid var(--gray-200);
+    border-radius: 5px;
+    padding: 9px 13px;
+    font-family: 'Barlow', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--gray-800);
+    background: #fff;
+    transition: border-color .15s, box-shadow .15s;
+    appearance: none;
+    -webkit-appearance: none;
+    width: 100%;
+  }
+  .form-control:focus {
+    outline: none;
+    border-color: var(--navy);
+    box-shadow: 0 0 0 3px rgba(27,58,107,0.1);
+  }
+  select.form-control {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a94b2' fill='none' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 13px center;
+    padding-right: 32px;
+    cursor: pointer;
+  }
+  .form-hint {
+    font-size: 10.5px;
+    color: var(--gray-400);
+    margin-top: 2px;
+  }
+  .form-unit {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .form-unit input {
+    flex: 1;
+    border-radius: 5px 0 0 5px;
+    border-right: none;
+  }
+  .form-unit .unit-badge {
+    background: var(--gray-100);
+    border: 1.5px solid var(--gray-200);
+    border-left: none;
+    border-radius: 0 5px 5px 0;
+    padding: 9px 11px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gray-400);
+    white-space: nowrap;
+  }
+
+  /* INSULATION TOGGLE */
+  .insul-toggle {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+    border: 1.5px solid var(--gray-200);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .insul-btn {
+    padding: 10px 8px;
+    text-align: center;
+    cursor: pointer;
+    background: #fff;
+    border: none;
+    border-right: 1px solid var(--gray-200);
+    font-family: 'Barlow', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gray-400);
+    transition: all .15s;
+    line-height: 1.3;
+  }
+  .insul-btn:last-child { border-right: none; }
+  .insul-btn:hover { background: var(--gray-50); color: var(--navy); }
+  .insul-btn.active {
+    background: var(--navy);
+    color: #fff;
+  }
+  .insul-btn .insul-icon { font-size: 18px; display: block; margin-bottom: 3px; }
+  .insul-btn .insul-name { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+  .insul-btn .insul-sub { font-size: 10px; opacity: 0.7; }
+
+  /* DIVIDER */
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--gray-100);
+    margin: 18px 0;
+  }
+
+  /* RESULT PANEL */
+  .result-panel {
+    position: sticky;
+    top: 20px;
+  }
+  .result-card {
+    background: var(--navy);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(27,58,107,0.25);
+  }
+  .result-head {
+    background: var(--orange);
+    padding: 16px 22px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .result-head-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #fff;
+  }
+  .result-body { padding: 22px; }
+
+  .result-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .result-meta-item {
+    background: rgba(255,255,255,0.07);
+    border-radius: 6px;
+    padding: 10px 12px;
+    text-align: center;
+  }
+  .result-meta-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 4px;
+  }
+  .result-meta-value {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .cost-breakdown { }
+  .cost-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 9px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    gap: 8px;
+  }
+  .cost-row:last-child { border-bottom: none; }
+  .cost-row-label {
+    font-size: 12.5px;
+    color: rgba(255,255,255,0.6);
+    font-weight: 400;
+  }
+  .cost-row-val {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.9);
+    white-space: nowrap;
+  }
+  .cost-row.highlight .cost-row-label { color: rgba(255,255,255,0.85); font-weight: 600; }
+  .cost-row.highlight .cost-row-val { color: #fff; font-size: 16px; }
+
+  .total-box {
+    background: var(--orange);
+    border-radius: 8px;
+    padding: 16px 18px;
+    margin-top: 16px;
+    text-align: center;
+  }
+  .total-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.75);
+    margin-bottom: 6px;
+  }
+  .total-price {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 38px;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1;
+  }
+  .total-sub {
+    font-size: 12px;
+    color: rgba(255,255,255,0.65);
+    margin-top: 4px;
+  }
+  .per-m2-box {
+    display: flex; justify-content: space-between; align-items: center;
+    background: rgba(255,255,255,0.08);
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin-top: 12px;
+  }
+  .per-m2-label { font-size: 11px; color: rgba(255,255,255,0.5); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+  .per-m2-val {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    color: #fff;
+  }
+
+  .margin-row {
+    display: flex; align-items: center; gap: 10px;
+    margin-top: 16px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 6px;
+    padding: 12px 14px;
+  }
+  .margin-label { font-size: 12px; color: rgba(255,255,255,0.5); flex: 1; font-weight: 500; }
+  .margin-input {
+    width: 64px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 4px;
+    color: #fff;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    text-align: center;
+    padding: 5px 4px;
+  }
+  .margin-input:focus { outline: none; border-color: var(--orange); }
+  .margin-pct { font-size: 13px; color: rgba(255,255,255,0.5); }
+
+  .calc-btn {
+    width: 100%;
+    margin-top: 16px;
+    background: var(--orange);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 14px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background .15s, transform .1s;
+  }
+  .calc-btn:hover { background: var(--orange-light); transform: translateY(-1px); }
+  .calc-btn:active { transform: translateY(0); }
+
+  .notes-card {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+    margin-top: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(27,58,107,0.04);
+  }
+  .notes-head {
+    background: var(--gray-100);
+    padding: 10px 16px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--gray-600);
+  }
+  .notes-body {
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .note-item {
+    display: flex;
+    gap: 7px;
+    font-size: 11.5px;
+    color: var(--gray-600);
+    line-height: 1.45;
+  }
+  .note-dot { color: var(--orange); flex-shrink: 0; margin-top: 2px; font-size: 13px; }
+
+  /* ZONE BANNER */
+  .zone-banner {
+    background: var(--orange-pale);
+    border: 1.5px solid rgba(232,80,10,0.2);
+    border-radius: 6px;
+    padding: 10px 14px;
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 16px;
+  }
+  .zone-banner-icon { font-size: 20px; }
+  .zone-banner-text { font-size: 12px; color: var(--orange); font-weight: 600; }
+
+  /* PANEL SELECTOR TABLE */
+  .panel-info-row {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--green-light);
+    border: 1px solid rgba(13,158,110,0.2);
+    border-radius: 5px;
+    padding: 8px 12px;
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--green);
+    font-weight: 600;
+  }
+
+  @media (max-width: 780px) {
+    .calc-main { grid-template-columns: 1fr; }
+    .form-grid { grid-template-columns: 1fr; }
+    .form-grid-3 { grid-template-columns: 1fr 1fr; }
+    .result-panel { position: static; }
+    .header-title { font-size: 30px; }
+    .insul-toggle { grid-template-columns: 1fr; }
+    .insul-btn { border-right: none; border-bottom: 1px solid var(--gray-200); }
+    .insul-btn:last-child { border-bottom: none; }
+  }
+</style>
+
+<style id="print-css">
+@media print {
+  .calc-header, .zone-bar, .left-col, .result-panel, .notes-card { display: none !important; }
+  body { background: #fff; }
+  #kp-wrapper { margin: 0 !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="calc-header">
+  <div class="header-inner">
+    <div class="header-badge">S HALLE — Tiešsaistes kalkulators</div>
+    <h1 class="header-title">Izmaksas<br><span>standarta angāram</span></h1>
+    <p class="header-sub">Saliekamas tērauda konstrukcijas · Sviču paneļu siltinājums · EXW Polija + piegāde</p>
+  </div>
+  <!-- SNOW ZONE BAR -->
+  <div class="zone-bar">
+    <div class="zone-bar-inner">
+      <span class="zone-label">❄ Sniega slodzes zona:</span>
+      <button class="zone-btn" onclick="setZone(1, this)">
+        <span class="zone-icon">1</span> Zona I
+      </button>
+      <button class="zone-btn active" onclick="setZone(2, this)">
+        <span class="zone-icon">2</span> Zona II
+      </button>
+      <button class="zone-btn" onclick="setZone(3, this)">
+        <span class="zone-icon">3</span> Zona III
+      </button>
+      <span class="zone-desc">Ietekmē konstrukcijas slodzi un metāla patēriņu</span>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="calc-main">
+  <div class="left-col">
+
+    <!-- SECTION 1: IZMĒRI -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-num">1</div>
+        <div class="section-title">Parametrsāra angāra</div>
+      </div>
+      <div class="section-body">
+        <div id="zone-banner" class="zone-banner">
+          <span class="zone-banner-icon">❄️</span>
+          <span class="zone-banner-text" id="zone-text">Sniega zona II · slodzes koef. 1.0 · metāla patēriņš 35 kg/m²</span>
+        </div>
+        <div class="form-grid-3">
+          <div class="form-group">
+            <label class="form-label">Garums <span>*</span></label>
+            <div class="form-unit">
+              <input type="number" class="form-control" id="length" value="24" min="6" max="120" step="6" oninput="calc()">
+              <span class="unit-badge">м</span>
+            </div>
+            <span class="form-hint">Solis 6 m · min 12 m</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Platums <span>*</span></label>
+            <div class="form-unit">
+              <input type="number" class="form-control" id="width" value="12" min="6" max="36" step="3" oninput="calc()">
+              <span class="unit-badge">м</span>
+            </div>
+            <span class="form-hint">Solis 3 m · min 9 m</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Sienas augstums <span>*</span></label>
+            <div class="form-unit">
+              <input type="number" class="form-control" id="height" value="5" min="3" max="12" step="0.5" oninput="calc()">
+              <span class="unit-badge">м</span>
+            </div>
+            <span class="form-hint">3–12 m</span>
+          </div>
+        </div>
+        <hr class="section-divider">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Jumta tips</label>
+            <select class="form-control" id="roof-type" onchange="calc()">
+              <option value="1.0">Vienpārseguma (standarts)</option>
+              <option value="1.08">Divpārseguma (+8%)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Jumta slīpuma leņķis</label>
+            <select class="form-control" id="roof-angle" onchange="calc()">
+              <option value="1.0">5° (standarts)</option>
+              <option value="1.02">8°</option>
+              <option value="1.04">12°</option>
+              <option value="1.06">15°</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 2: PANEĻI -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-num">2</div>
+        <div class="section-title">Siltinājuma tips un paneļi</div>
+      </div>
+      <div class="section-body">
+        <div class="form-group" style="margin-bottom:18px">
+          <label class="form-label">Siltinājuma tips — sienas</label>
+          <div class="insul-toggle">
+            <button class="insul-btn active" onclick="setInsul('pir', this)">
+              <span class="insul-icon">🔶</span>
+              <span class="insul-name">PIR</span>
+              <span class="insul-sub">Poliuretāns</span>
+            </button>
+            <button class="insul-btn" onclick="setInsul('mw', this)">
+              <span class="insul-icon">🪨</span>
+              <span class="insul-name">MV (MiWo)</span>
+              <span class="insul-sub">Akmens vate</span>
+            </button>
+            <button class="insul-btn" onclick="setInsul('cold', this)">
+              <span class="insul-icon">🏗</span>
+              <span class="insul-name">Aukstais</span>
+              <span class="insul-sub">Bez silt.</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group" id="wall-thick-group">
+            <label class="form-label">Sienas paneļa biezums</label>
+            <select class="form-control" id="wall-thickness" onchange="calc()">
+              <!-- filled by JS -->
+            </select>
+            <div id="wall-price-info" class="panel-info-row" style="display:none">✓ ARPANEL cena: <span id="wall-price-text"></span></div>
+          </div>
+          <div class="form-group" id="wall-width-group">
+            <label class="form-label">Paneļa platums</label>
+            <select class="form-control" id="wall-width" onchange="calc()">
+              <option value="1000">1000 мм</option>
+              <option value="1150" selected>1150 мм</option>
+            </select>
+          </div>
+          <div class="form-group" id="roof-thick-group">
+            <label class="form-label">Jumta paneļa biezums</label>
+            <select class="form-control" id="roof-thickness" onchange="calc()">
+              <!-- filled by JS -->
+            </select>
+            <div id="roof-price-info" class="panel-info-row" style="display:none">✓ ARPANEL cena: <span id="roof-price-text"></span></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Jumta paneļa platums</label>
+            <select class="form-control" id="roof-width" onchange="calc()">
+              <option value="1000" selected>1000 мм</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 3: KONSTRUKCIJA -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-num">3</div>
+        <div class="section-title">Konstrukcija un montāža</div>
+      </div>
+      <div class="section-body">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Metālkonstrukcijas cena</label>
+            <div class="form-unit">
+              <input type="number" class="form-control" id="steel-price" value="1350" min="800" max="2500" oninput="calc()">
+              <span class="unit-badge">€/т</span>
+            </div>
+            <span class="form-hint">Tirgus cena: 1200–1600 €/t</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Metāla patēriņš <span>*</span></label>
+            <div class="form-unit">
+              <input type="number" class="form-control" id="steel-kg" value="35" min="10" max="120" step="1" oninput="calc()">
+              <span class="unit-badge">kg/m²</span>
+            </div>
+            <span class="form-hint">Zona II standarts: 35 · zona III: ~40</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Metālkonstrukcijas montāža</label>
+            <div class="form-unit">
+              <input type="number" class="form-control" id="steel-install" value="400" min="50" max="1200" oninput="calc()">
+              <span class="unit-badge">€/т</span>
+            </div>
+            <span class="form-hint">Standarts 350–500 €/t</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Paneļu montāža</label>
+            <div class="form-unit">
+              <input type="number" class="form-control" id="panel-install" value="8" min="3" max="25" oninput="calc()">
+              <span class="unit-badge">€/m²</span>
+            </div>
+            <span class="form-hint">Standarts 6–12 €/m²</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Papildizmaksas (mehānismi)</label>
+            <div class="form-unit">
+              <input type="number" class="form-control" id="extra-costs" value="1500" min="0" oninput="calc()">
+              <span class="unit-badge">€</span>
+            </div>
+            <span class="form-hint">Celtnis, pacēlājs, papildinstruments</span>
+          </div>
+        </div>
+        <hr class="section-divider">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Sekciju vārti</label>
+            <div class="form-unit">
+              <input type="number" class="form-control" id="gates" value="1" min="0" max="10" oninput="calc()">
+              <span class="unit-badge">шт</span>
+            </div>
+            <span class="form-hint">≈ 1 500 € gab.</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Logi / gaismas lentes</label>
+            <div class="form-unit">
+              <input type="number" class="form-control" id="windows" value="0" min="0" oninput="calc()">
+              <span class="unit-badge">шт</span>
+            </div>
+            <span class="form-hint">≈ 300 € gab.</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Metāla durvis</label>
+            <div class="form-unit">
+              <input type="number" class="form-control" id="doors" value="1" min="0" oninput="calc()">
+              <span class="unit-badge">шт</span>
+            </div>
+            <span class="form-hint">≈ 400 € gab.</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Piegāde</label>
+            <div class="form-unit">
+              <input type="number" class="form-control" id="delivery" value="1800" min="0" oninput="calc()">
+              <span class="unit-badge">€</span>
+            </div>
+            <span class="form-hint">EXW Polija → tirgus</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /left -->
+
+  <!-- RIGHT: RESULT -->
+  <div class="result-panel">
+    <div class="result-card">
+      <div class="result-head">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        <span class="result-head-title">Provizoriskais aprēķins</span>
+      </div>
+      <div class="result-body">
+        <div class="result-meta">
+          <div class="result-meta-item">
+            <div class="result-meta-label">Apbūves laukums</div>
+            <div class="result-meta-value" id="r-area">288 m²</div>
+          </div>
+          <div class="result-meta-item">
+            <div class="result-meta-label">Paneļu laukums</div>
+            <div class="result-meta-value" id="r-panel-area">— m²</div>
+          </div>
+          <div class="result-meta-item">
+            <div class="result-meta-label">Metāls (t)</div>
+            <div class="result-meta-value" id="r-steel-tons">—</div>
+          </div>
+          <div class="result-meta-item">
+            <div class="result-meta-label">Sniega zona</div>
+            <div class="result-meta-value" id="r-zone">I</div>
+          </div>
+        </div>
+
+        <div class="cost-breakdown">
+          <div class="cost-row">
+            <span class="cost-row-label">🔩 Metālkonstrukcija</span>
+            <span class="cost-row-val" id="r-steel">—</span>
+          </div>
+          <div class="cost-row">
+            <span class="cost-row-label">🧱 Sienas paneļi</span>
+            <span class="cost-row-val" id="r-wall-panels">—</span>
+          </div>
+          <div class="cost-row">
+            <span class="cost-row-label">🏠 Jumta paneļi</span>
+            <span class="cost-row-val" id="r-roof-panels">—</span>
+          </div>
+          <div class="cost-row">
+            <span class="cost-row-label">🔧 Stiprinājumi un apdare (+15%)</span>
+            <span class="cost-row-val" id="r-fasteners">—</span>
+          </div>
+          <div class="cost-row">
+            <span class="cost-row-label">🏗 Konstrukcijas montāža</span>
+            <span class="cost-row-val" id="r-install-steel">—</span>
+          </div>
+          <div class="cost-row">
+            <span class="cost-row-label">🪟 Paneļu montāža</span>
+            <span class="cost-row-val" id="r-install-panels">—</span>
+          </div>
+          <div class="cost-row">
+            <span class="cost-row-label">🚪 Vārti/logi/durvis</span>
+            <span class="cost-row-val" id="r-extras">—</span>
+          </div>
+          <div class="cost-row">
+            <span class="cost-row-label">🚛 Piegāde + mehānismi</span>
+            <span class="cost-row-val" id="r-logistics">—</span>
+          </div>
+          <div class="cost-row highlight">
+            <span class="cost-row-label">📐 Projekts (3%)</span>
+            <span class="cost-row-val" id="r-project">—</span>
+          </div>
+          <div class="cost-row highlight" style="border-top: 1px solid rgba(255,255,255,0.15); padding-top:12px; margin-top:4px">
+            <span class="cost-row-label" style="font-size:13px; color:rgba(255,255,255,0.8)">KOPĀ PAŠIZMAKSA</span>
+            <span class="cost-row-val" style="font-size:17px; color:#fff" id="r-cost">—</span>
+          </div>
+        </div>
+
+        <div class="margin-row">
+          <span class="margin-label">Uzcenojums</span>
+          <input type="number" class="margin-input" id="margin" value="10" min="0" max="50" oninput="calc()">
+          <span class="margin-pct">%</span>
+        </div>
+
+        <div class="total-box">
+          <div class="total-label">KP cena klientam</div>
+          <div class="total-price" id="r-total">— €</div>
+          <div class="total-sub" id="r-total-vat">+ PVN pēc valsts</div>
+        </div>
+
+        <div class="per-m2-box">
+          <span class="per-m2-label">Cena / m² laukumam</span>
+          <span class="per-m2-val" id="r-per-m2">— €/м²</span>
+        </div>
+        <div class="per-m2-box" style="margin-top:8px">
+          <span class="per-m2-label">Uzcenojums (€)</span>
+          <span class="per-m2-val" id="r-margin-eur" style="color: #6ee7c0">— €</span>
+        </div>
+
+        <button class="calc-btn" onclick="printResult()">📄 Sagatavot KP klientam</button>
+      </div>
+    </div>
+
+    <div class="notes-card">
+      <div class="notes-head">⚠ Aprēķina nosacījumi</div>
+      <div class="notes-body">
+        <div class="note-item"><span class="note-dot">▸</span>ARPANEL cenas · EXW Polija · bez muitas</div>
+        <div class="note-item"><span class="note-dot">▸</span>Stiprinājumi un apdare: +15% no paneļu cenas</div>
+        <div class="note-item"><span class="note-dot">▸</span>Projekts: 3% no kopējās vērtības</div>
+        <div class="note-item"><span class="note-dot">▸</span>Metāla patēriņš: <span id="note-steel">35</span> kg/m² (zona I); zona II +10%; zona III +20%</div>
+        <div class="note-item"><span class="note-dot">▸</span>Aprēķins indikatīvs · precīzu KP sniegs menedžeris</div>
+        <div class="note-item"><span class="note-dot">▸</span>Derīguma termiņš: 14 darba dienas</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ============================================================
+// PRICE DATABASE (from ARPANEL PDFs)
+// ============================================================
+
+// PIR Wall panels: { key: "thickness_width_sheet" : price }
+// sheet: "0505" = 0.5/0.5, "0504" = 0.5/0.4
+const PIR_WALL = {
+  // 1000/1100mm width (ARPANEL S PIR + ARPANEL CH PIR)
+  "60_1000_0505": 21.87,  "60_1000_0504": 20.87,
+  "80_1000_0505": 24.38,  "80_1000_0504": 23.38,
+  "100_1000_0505": 26.93, "100_1000_0504": 25.93,
+  "120_1000_0505": 29.27, "120_1000_0504": 28.27,
+  "140_1000_0505": 32.47, "140_1000_0504": 31.47,
+  "160_1000_0505": 35.04, "160_1000_0504": 34.04,
+  "200_1000_0505": 40.72, "200_1000_0504": 39.72,
+  // 1150mm width
+  "60_1150_0505": 21.67,  "60_1150_0504": 20.67,
+  "80_1150_0505": 24.18,  "80_1150_0504": 23.18,
+  "100_1150_0505": 26.73, "100_1150_0504": 25.73,
+  "120_1150_0505": 29.07, "120_1150_0504": 28.07,
+  "140_1150_0505": 32.27, "140_1150_0504": 31.27,
+  "160_1150_0505": 34.84, "160_1150_0504": 33.84,
+  "200_1150_0505": 40.52, "200_1150_0504": 39.52,
+};
+
+// PIR Roof panels (ARPANEL D PIR) - only 1000mm
+const PIR_ROOF = {
+  "60_1000_0505": 23.03, "60_1000_0504": 22.03,
+  "80_1000_0505": 25.70, "80_1000_0504": 24.70,
+  "100_1000_0505": 28.32,"100_1000_0504": 27.32,
+  "120_1000_0505": 30.72,"120_1000_0504": 29.72,
+  "160_1000_0505": 35.75,"160_1000_0504": 34.75,
+};
+
+// PIR Hidden joint (SU) wall panels 1000mm
+const PIR_HIDDEN = {
+  "60_1000_0505": 22.62,  "60_1000_0504": 21.62,
+  "80_1000_0505": 25.21,  "80_1000_0504": 24.21,
+  "100_1000_0505": 27.84, "100_1000_0504": 26.84,
+  "120_1000_0505": 30.50, "120_1000_0504": 29.50,
+};
+
+// MiWo MXL wall panels Q2 2026
+const MW_WALL = {
+  "80_1000": 27.54,  "100_1000": 30.14, "120_1000": 33.00,
+  "150_1000": 37.07, "160_1000": 38.98, "180_1000": 42.75,
+  "200_1000": 45.18, "220_1000": 48.58, "240_1000": 50.25,
+  "80_1150": 27.34,  "100_1150": 29.94, "120_1150": 32.80,
+  "150_1150": 36.87, "160_1150": 38.78, "180_1150": 42.55,
+  "200_1150": 44.98, "220_1150": 48.38, "240_1150": 50.05,
+  "80_1100": 28.54,  "100_1100": 31.22, "120_1100": 34.16,
+  "150_1100": 38.35, "160_1100": 38.40, "180_1100": 44.15,
+  "200_1100": 46.65, "220_1100": 50.05, "240_1100": 49.85,
+};
+
+// State
+let insulType = 'pir';
+let snowZone = 2;
+
+const ZONE_STEEL_COEFF = { 1: 0.90, 2: 1.0, 3: 1.15 };
+
+function setZone(z, btn) {
+  snowZone = z;
+  document.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('r-zone').textContent = ['', 'I', 'II', 'III'][z];
+  const coeff = ZONE_STEEL_COEFF[z];
+  document.getElementById('zone-text').textContent =
+    `Sniega zona ${['','I','II','III'][z]} · norādiet metāla patēriņu kg/m² 3. sadaļā`;
+  document.getElementById('note-steel').textContent = document.getElementById('steel-kg').value || 35;
+  calc();
+}
+
+function setInsul(type, btn) {
+  insulType = type;
+  document.querySelectorAll('.insul-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  buildThicknessOptions();
+  updateWidthOptions();
+  calc();
+}
+
+function buildThicknessOptions() {
+  const wSel = document.getElementById('wall-thickness');
+  const rSel = document.getElementById('roof-thickness');
+  wSel.innerHTML = '';
+  rSel.innerHTML = '';
+
+  let wallOpts = [], roofOpts = [];
+
+  if (insulType === 'pir') {
+    wallOpts = [60,80,100,120,140,160,200];
+    roofOpts = [60,80,100,120,160];
+  } else if (insulType === 'mw') {
+    wallOpts = [80,100,120,150,160,180,200,220,240];
+    roofOpts = []; // MiWo roof not standard - use PIR roof
+    // Add note
+  } else {
+    // cold - no panels
+    wallOpts = [];
+    roofOpts = [];
+  }
+
+  if (insulType === 'cold') {
+    document.getElementById('wall-thick-group').style.opacity = '0.5';
+    document.getElementById('roof-thick-group').style.opacity = '0.5';
+    const opt1 = new Option('Profilēta loksne (8 €/m²)', '8'); wSel.add(opt1);
+    const opt2 = new Option('Profilēta loksne (8 €/m²)', '8'); rSel.add(opt2);
+  } else {
+    document.getElementById('wall-thick-group').style.opacity = '1';
+    document.getElementById('roof-thick-group').style.opacity = '1';
+    wallOpts.forEach(t => {
+      const o = new Option(`${t} мм`, t);
+      if (t === 100) o.selected = true;
+      wSel.add(o);
+    });
+    if (insulType === 'mw') {
+      // roof always PIR for MiWo
+      [60,80,100,120,160].forEach(t => {
+        const o = new Option(`${t} mm (PIR jumts)`, t);
+        if (t === 100) o.selected = true;
+        rSel.add(o);
+      });
+    } else {
+      roofOpts.forEach(t => {
+        const o = new Option(`${t} мм`, t);
+        if (t === 100) o.selected = true;
+        rSel.add(o);
+      });
+    }
+  }
+  updatePriceInfo();
+}
+
+function updateWidthOptions() {
+  const wSel = document.getElementById('wall-width');
+  if (insulType === 'mw') {
+    wSel.innerHTML = '<option value="1000">1000 мм</option><option value="1150" selected>1150 мм</option><option value="1100">1100 мм</option>';
+  } else {
+    wSel.innerHTML = '<option value="1000">1000 мм</option><option value="1150" selected>1150 мм</option>';
+  }
+}
+
+function getPirWallPrice(thick, width) {
+  const key = `${thick}_${width}_0505`;
+  return PIR_WALL[key] || PIR_WALL[`${thick}_1000_0505`] || 0;
+}
+function getMwWallPrice(thick, width) {
+  const key = `${thick}_${width}`;
+  return MW_WALL[key] || MW_WALL[`${thick}_1000`] || 0;
+}
+function getPirRoofPrice(thick) {
+  const key = `${thick}_1000_0505`;
+  return PIR_ROOF[key] || 0;
+}
+
+function updatePriceInfo() {
+  const wallThick = parseInt(document.getElementById('wall-thickness').value) || 0;
+  const wallWidth = parseInt(document.getElementById('wall-width').value) || 1150;
+  const roofThick = parseInt(document.getElementById('roof-thickness').value) || 0;
+
+  let wPrice = 0, rPrice = 0;
+  if (insulType === 'pir') {
+    wPrice = getPirWallPrice(wallThick, wallWidth);
+    rPrice = getPirRoofPrice(roofThick);
+  } else if (insulType === 'mw') {
+    wPrice = getMwWallPrice(wallThick, wallWidth);
+    rPrice = getPirRoofPrice(roofThick);
+  } else if (insulType === 'cold') {
+    wPrice = 8.0;
+    rPrice = 8.0;
+  }
+
+  const wi = document.getElementById('wall-price-info');
+  const ri = document.getElementById('roof-price-info');
+  if (wPrice > 0) {
+    wi.style.display = 'flex';
+    const wLabel = insulType === 'cold'
+      ? '8.00 €/m² — profilēta loksne siena (aukstais angārs)'
+      : wPrice.toFixed(2) + ' €/m² (EXW Polija)';
+    document.getElementById('wall-price-text').textContent = wLabel;
+  } else { wi.style.display = 'none'; }
+  if (rPrice > 0) {
+    ri.style.display = 'flex';
+    const rLabel = insulType === 'cold'
+      ? '8.00 €/m² — profilēta loksne jumts (aukstais angārs)'
+      : rPrice.toFixed(2) + ' €/m² (EXW Polija)';
+    document.getElementById('roof-price-text').textContent = rLabel;
+  } else { ri.style.display = 'none'; }
+}
+
+function fmt(n) {
+  return Math.round(n).toLocaleString('ru-RU') + ' €';
+}
+
+function calc() {
+  updatePriceInfo();
+
+  const L = parseFloat(document.getElementById('length').value) || 0;
+  const W = parseFloat(document.getElementById('width').value) || 0;
+  const H = parseFloat(document.getElementById('height').value) || 0;
+  const roofCoeff = parseFloat(document.getElementById('roof-type').value) || 1.0;
+  const angleCoeff = parseFloat(document.getElementById('roof-angle').value) || 1.0;
+  const wallThick = parseInt(document.getElementById('wall-thickness').value) || 0;
+  const wallWidth = parseInt(document.getElementById('wall-width').value) || 1150;
+  const roofThick = parseInt(document.getElementById('roof-thickness').value) || 0;
+  const steelPricePerTon = parseFloat(document.getElementById('steel-price').value) || 1350;
+  const steelInstall = parseFloat(document.getElementById('steel-install').value) || 12;
+  const panelInstall = parseFloat(document.getElementById('panel-install').value) || 8;
+  const extraCosts = parseFloat(document.getElementById('extra-costs').value) || 0;
+  const gates = parseInt(document.getElementById('gates').value) || 0;
+  const windows = parseInt(document.getElementById('windows').value) || 0;
+  const doors = parseInt(document.getElementById('doors').value) || 0;
+  const delivery = parseFloat(document.getElementById('delivery').value) || 0;
+  const marginPct = parseFloat(document.getElementById('margin').value) || 0;
+
+  const area = L * W;
+  document.getElementById('r-area').textContent = area.toLocaleString('ru-RU') + ' m²';
+  document.getElementById('r-zone').textContent = ['','I','II','III'][snowZone];
+
+  // Steel weight
+  const steelKgPerM2 = parseFloat(document.getElementById('steel-kg').value) || 35;
+  const steelTons = area * steelKgPerM2 / 1000;
+  document.getElementById('r-steel-tons').textContent = steelTons.toFixed(2) + ' т';
+
+  // Panel areas
+  const wallArea = 2 * (L + W) * H; // perimeter * height
+  const roofArea = L * W * roofCoeff * angleCoeff;
+  const totalPanelArea = wallArea + roofArea;
+  document.getElementById('r-panel-area').textContent = Math.round(totalPanelArea) + ' m²';
+
+  // Panel prices
+  const COLD_PRICE_M2 = 8.0; // profilēta loksne aukstais angārs €/м²
+  let wallPriceM2 = 0, roofPriceM2 = 0;
+  if (insulType === 'pir') {
+    wallPriceM2 = wallThick > 0 ? getPirWallPrice(wallThick, wallWidth) : 0;
+    roofPriceM2 = roofThick > 0 ? getPirRoofPrice(roofThick) : 0;
+  } else if (insulType === 'mw') {
+    wallPriceM2 = wallThick > 0 ? getMwWallPrice(wallThick, wallWidth) : 0;
+    roofPriceM2 = roofThick > 0 ? getPirRoofPrice(roofThick) : 0;
+  } else if (insulType === 'cold') {
+    wallPriceM2 = COLD_PRICE_M2;
+    roofPriceM2 = COLD_PRICE_M2;
+  }
+
+  const wallPanelCost = wallArea * wallPriceM2;
+  const roofPanelCost = roofArea * roofPriceM2;
+  const totalPanelCost = wallPanelCost + roofPanelCost;
+
+  // Steel cost
+  const steelCost = steelTons * steelPricePerTon;
+
+  // Fasteners & trim: 15% of panels
+  const fastenersCost = totalPanelCost * 0.15;
+
+  // Installation
+  const installSteel = steelTons * steelInstall;
+  const installPanels = totalPanelArea * panelInstall;
+
+  // Extras
+  const extraOpenings = gates * 1500 + windows * 300 + doors * 400;
+  const logistics = delivery + extraCosts;
+
+  // Subtotal before project fee
+  const subtotal = steelCost + totalPanelCost + fastenersCost + installSteel + installPanels + extraOpenings + logistics;
+
+  // Project fee: 3% of total (on subtotal basis)
+  const projectFee = subtotal * 0.03;
+
+  const totalCost = subtotal + projectFee;
+
+  // With margin
+  const salePrice = totalCost / (1 - marginPct / 100);
+  const marginEur = salePrice - totalCost;
+
+  // Update DOM
+  document.getElementById('r-steel').textContent = fmt(steelCost);
+  document.getElementById('r-wall-panels').textContent = wallPriceM2 > 0 ? fmt(wallPanelCost) : '—';
+  document.getElementById('r-roof-panels').textContent = roofPriceM2 > 0 ? fmt(roofPanelCost) : '—';
+  document.getElementById('r-fasteners').textContent = fmt(fastenersCost);
+  document.getElementById('r-install-steel').textContent = fmt(installSteel);
+  document.getElementById('r-install-panels').textContent = fmt(installPanels);
+  document.getElementById('r-extras').textContent = fmt(extraOpenings);
+  document.getElementById('r-logistics').textContent = fmt(logistics);
+  document.getElementById('r-project').textContent = fmt(projectFee);
+  document.getElementById('r-cost').textContent = fmt(totalCost);
+  document.getElementById('r-total').textContent = Math.round(salePrice).toLocaleString('ru-RU') + ' €';
+  document.getElementById('r-per-m2').textContent = area > 0 ? Math.round(salePrice / area) + ' €/м²' : '—';
+  document.getElementById('r-margin-eur').textContent = fmt(marginEur);
+}
+
+function printResult() {
+  generateKP();
+}
+
+function m(n) { return Math.round(n).toLocaleString('ru-RU'); }
+
+function generateKP() {
+  // Gather all current values
+  const L = parseFloat(document.getElementById('length').value) || 0;
+  const W = parseFloat(document.getElementById('width').value) || 0;
+  const H = parseFloat(document.getElementById('height').value) || 0;
+  const roofCoeff = parseFloat(document.getElementById('roof-type').value) || 1.0;
+  const angleCoeff = parseFloat(document.getElementById('roof-angle').value) || 1.0;
+  const wallThick = parseInt(document.getElementById('wall-thickness').value) || 0;
+  const wallWidth = parseInt(document.getElementById('wall-width').value) || 1150;
+  const roofThick = parseInt(document.getElementById('roof-thickness').value) || 0;
+  const steelPricePerTon = parseFloat(document.getElementById('steel-price').value) || 1350;
+  const steelKgPerM2 = parseFloat(document.getElementById('steel-kg').value) || 35;
+  const steelInstall = parseFloat(document.getElementById('steel-install').value) || 400;
+  const panelInstall = parseFloat(document.getElementById('panel-install').value) || 8;
+  const extraCosts = parseFloat(document.getElementById('extra-costs').value) || 0;
+  const gates = parseInt(document.getElementById('gates').value) || 0;
+  const windows = parseInt(document.getElementById('windows').value) || 0;
+  const doors = parseInt(document.getElementById('doors').value) || 0;
+  const delivery = parseFloat(document.getElementById('delivery').value) || 0;
+  const marginPct = parseFloat(document.getElementById('margin').value) || 0;
+
+  const area = L * W;
+  const steelTons = area * steelKgPerM2 / 1000;
+  const wallArea = 2 * (L + W) * H;
+  const roofArea = L * W * roofCoeff * angleCoeff;
+  const totalPanelArea = wallArea + roofArea;
+
+  let wallPriceM2 = 0, roofPriceM2 = 0;
+  if (insulType === 'pir') {
+    wallPriceM2 = wallThick > 0 ? getPirWallPrice(wallThick, wallWidth) : 0;
+    roofPriceM2 = roofThick > 0 ? getPirRoofPrice(roofThick) : 0;
+  } else if (insulType === 'mw') {
+    wallPriceM2 = wallThick > 0 ? getMwWallPrice(wallThick, wallWidth) : 0;
+    roofPriceM2 = roofThick > 0 ? getPirRoofPrice(roofThick) : 0;
+  } else if (insulType === 'cold') {
+    wallPriceM2 = 8.0; roofPriceM2 = 8.0;
+  }
+
+  const wallPanelCost = wallArea * wallPriceM2;
+  const roofPanelCost = roofArea * roofPriceM2;
+  const totalPanelCost = wallPanelCost + roofPanelCost;
+  const steelCost = steelTons * steelPricePerTon;
+  const fastenersCost = totalPanelCost * 0.15;
+  const installSteel = steelTons * steelInstall;
+  const installPanels = totalPanelArea * panelInstall;
+  const extraOpenings = gates * 1500 + windows * 300 + doors * 400;
+  const logistics = delivery + extraCosts;
+  const subtotal = steelCost + totalPanelCost + fastenersCost + installSteel + installPanels + extraOpenings + logistics;
+  const projectFee = subtotal * 0.03;
+  const totalCost = subtotal + projectFee;
+  const salePrice = totalCost / (1 - marginPct / 100);
+  const marginEur = salePrice - totalCost;
+
+  const insulName = insulType === 'pir' ? 'PIR (poliuretāns)' : insulType === 'mw' ? 'MV MiWo (akmens vate)' : 'Aukstais (bez siltinājuma)';
+  const roofTypeName = document.getElementById('roof-type').options[document.getElementById('roof-type').selectedIndex].text;
+  const zoneName = ['','I','II','III'][snowZone];
+  const today = new Date().toLocaleDateString('ru-RU');
+  const validity = new Date(Date.now() + 14*864e5).toLocaleDateString('ru-RU');
+
+  // Apply margin to each line item proportionally
+  const k = salePrice / totalCost; // margin multiplier
+
+  const rows = [
+    ['№', 'Nosaukums pozīcijas', 'Vien.', 'Daudzums', 'Cena/vien. (€)', 'Summa (€)'],
+    ['1', 'Angāra rāmja metālkonstrukcija (kolonnas, fermāras, sijas)', 'т', steelTons.toFixed(2), m(steelPricePerTon * k), m(steelCost * k)],
+    ['2', 'Sienas sviču paneļi ' + insulName + ' ' + wallThick + 'mm, pl.' + wallWidth + 'мм', 'м²', m(wallArea), wallPriceM2 > 0 ? (wallPriceM2 * k).toFixed(2) : '—', wallPriceM2 > 0 ? m(wallPanelCost * k) : '—'],
+    ['3', 'Jumta sviču paneļi PIR ' + roofThick + 'mm, pl.1000мм', 'м²', m(roofArea), roofPriceM2 > 0 ? (roofPriceM2 * k).toFixed(2) : '—', roofPriceM2 > 0 ? m(roofPanelCost * k) : '—'],
+    ['4', 'Stiprinājumi, papildelementi, apdares lentes (+15% no paneļiem)', 'kompl.', '1', '—', m(fastenersCost * k)],
+    ['5', 'Metālkonstrukcijas montāža', 'т', steelTons.toFixed(2), m(steelInstall * k), m(installSteel * k)],
+    ['6', 'Sviču paneļu montāža (sienas + jumts)', 'м²', m(totalPanelArea), (panelInstall * k).toFixed(2), m(installPanels * k)],
+    gates > 0 ? ['7а', 'Sekciju vārti', 'gab.', gates, m(1500 * k), m(gates * 1500 * k)] : null,
+    windows > 0 ? ['7б', 'Logi / gaismas lentes', 'gab.', windows, m(300 * k), m(windows * 300 * k)] : null,
+    doors > 0 ? ['7в', 'Metāla durvis', 'gab.', doors, m(400 * k), m(doors * 400 * k)] : null,
+    ['8', 'Piegāde materiālu (EXW Polija)', 'kompl.', '1', '—', m(delivery * k)],
+    extraCosts > 0 ? ['9', 'Mehānismu noma un papildaprīkojums', 'kompl.', '1', '—', m(extraCosts * k)] : null,
+    ['10', 'Inženierprojekts (3% no vērtības)', 'kompl.', '1', '—', m(projectFee * k)],
+  ].filter(Boolean);
+
+  const techSpecs = [
+    ['Parametrs', 'Vērtība'],
+    ['Angāra garums', L + ' м'],
+    ['Angāra platums', W + ' м'],
+    ['Sienas augstums', H + ' м'],
+    ['Apbūves laukums', m(area) + ' m²'],
+    ['Sienu laukums (paneļi)', m(wallArea) + ' m²'],
+    ['Jumta laukums (paneļi)', m(roofArea) + ' m²'],
+    ['Siltinājuma tips', insulName],
+    ['Sienas paneļa biezums', wallThick + ' мм'],
+    ['Jumta paneļa biezums', roofThick + ' мм'],
+    ['Jumta tips', roofTypeName],
+    ['Konstrukcijas svars', steelTons.toFixed(2) + ' t (' + steelKgPerM2 + ' kg/m²)'],
+    ['Sniega zona', 'Zona ' + zoneName],
+  ];
+
+  // Build KP block HTML
+  const kpHtml = `
+<div id="kp-block" style="font-family:'Barlow',sans-serif; max-width:900px; margin:32px auto 0; background:#fff; border:1px solid #dde2ef; border-radius:10px; overflow:hidden; box-shadow:0 4px 24px rgba(27,58,107,0.10);">
+
+  <!-- KP Header -->
+  <div style="background:#1B3A6B; padding:28px 36px; display:flex; justify-content:space-between; align-items:flex-start; gap:20px; flex-wrap:wrap;">
+    <div>
+      <div style="color:#E8500A; font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; margin-bottom:8px;">KOMERCIĀLAIS PIEDĀVĀJUMS</div>
+      <div style="color:#fff; font-size:26px; font-weight:800; font-family:'Barlow Condensed',sans-serif; line-height:1.1;">S HALLE — Angārs ${L}×${W}×${H}м</div>
+      <div style="color:rgba(255,255,255,0.5); font-size:13px; margin-top:6px;">${insulName}</div>
+    </div>
+    <div style="text-align:right; min-width:160px;">
+      <div style="color:rgba(255,255,255,0.45); font-size:10px; font-weight:600; letter-spacing:1px; text-transform:uppercase;">KP datums</div>
+      <div style="color:#fff; font-size:15px; font-weight:600; margin-top:2px;">${today}</div>
+      <div style="color:rgba(255,255,255,0.45); font-size:10px; font-weight:600; letter-spacing:1px; text-transform:uppercase; margin-top:10px;">Derīgs līdz</div>
+      <div style="color:#E8500A; font-size:15px; font-weight:700; margin-top:2px;">${validity}</div>
+    </div>
+  </div>
+
+  <!-- Tech specs strip -->
+  <div style="background:#f0f2f8; padding:14px 36px; display:flex; gap:24px; flex-wrap:wrap; border-bottom:1px solid #dde2ef;">
+    ${techSpecs.slice(1).map(r => `<div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:10px;font-weight:700;color:#8a94b2;letter-spacing:1px;text-transform:uppercase">${r[0]}</span><span style="font-size:13px;font-weight:600;color:#1B3A6B">${r[1]}</span></div>`).join('')}
+  </div>
+
+  <!-- Price table -->
+  <div style="padding:28px 36px;">
+    <div style="font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#1B3A6B; margin-bottom:14px;">Piedāvājuma sastāvs</div>
+    <table id="kp-table" style="width:100%; border-collapse:collapse; font-size:13px;">
+      <thead>
+        <tr style="background:#1B3A6B;">
+          <th style="padding:10px 12px; color:#fff; font-family:'Barlow Condensed',sans-serif; font-size:11px; letter-spacing:1px; text-transform:uppercase; text-align:left; width:32px;">№</th>
+          <th style="padding:10px 12px; color:#fff; font-family:'Barlow Condensed',sans-serif; font-size:11px; letter-spacing:1px; text-transform:uppercase; text-align:left;">Nosaukums</th>
+          <th style="padding:10px 12px; color:#fff; font-family:'Barlow Condensed',sans-serif; font-size:11px; letter-spacing:1px; text-transform:uppercase; text-align:center; white-space:nowrap;">Vien.</th>
+          <th style="padding:10px 12px; color:#fff; font-family:'Barlow Condensed',sans-serif; font-size:11px; letter-spacing:1px; text-transform:uppercase; text-align:center; white-space:nowrap;">Daudzums</th>
+          <th style="padding:10px 12px; color:#fff; font-family:'Barlow Condensed',sans-serif; font-size:11px; letter-spacing:1px; text-transform:uppercase; text-align:right; white-space:nowrap;">Cena/vien. €</th>
+          <th style="padding:10px 12px; color:#fff; font-family:'Barlow Condensed',sans-serif; font-size:11px; letter-spacing:1px; text-transform:uppercase; text-align:right; white-space:nowrap;">Summa €</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows.map((r, i) => `<tr style="background:${i%2===0?'#f8f9fc':'#fff'}; border-bottom:1px solid #eef0f6;">
+          <td style="padding:10px 12px; color:#8a94b2; font-weight:600;">${r[0]}</td>
+          <td style="padding:10px 12px; color:#1e2a45; font-weight:500; line-height:1.4;">${r[1]}</td>
+          <td style="padding:10px 12px; color:#4a5578; text-align:center;">${r[2]}</td>
+          <td style="padding:10px 12px; color:#4a5578; text-align:center; font-weight:600;">${r[3]}</td>
+          <td style="padding:10px 12px; color:#4a5578; text-align:right;">${r[4]}</td>
+          <td style="padding:10px 12px; color:#1B3A6B; text-align:right; font-weight:700; font-family:'Barlow Condensed',sans-serif; font-size:15px;">${r[5]}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+
+    <!-- Total -->
+    <div style="display:flex; justify-content:flex-end; margin-top:16px;">
+      <div style="background:#1B3A6B; border-radius:8px; padding:18px 28px; text-align:right; min-width:300px;">
+        <div style="color:rgba(255,255,255,0.5); font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:6px;">KOPĀ BEZ PVN</div>
+        <div style="color:#fff; font-family:'Barlow Condensed',sans-serif; font-size:36px; font-weight:800; line-height:1;">${m(salePrice)} €</div>
+        <div style="color:rgba(255,255,255,0.45); font-size:12px; margin-top:6px;">${m(salePrice / area)} €/m² · laukums ${m(area)} m²</div>
+      </div>
+    </div>
+
+    <!-- Conditions -->
+    <div style="margin-top:24px; background:#f8f9fc; border:1px solid #dde2ef; border-radius:6px; padding:16px 20px;">
+      <div style="font-size:11px; font-weight:700; letter-spacing:1.2px; text-transform:uppercase; color:#4a5578; margin-bottom:10px;">Piedāvājuma nosacījumi</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px 24px; font-size:12px; color:#4a5578; line-height:1.5;">
+        <div>▸ KP derīguma termiņš: 14 darba dienas (līdz ${validity})</div>
+        <div>▸ Apmaksas nosacījumi: 50% avanss / 50% pirms montāžas</div>
+        <div>▸ Piegāde: EXW rūpnīca Polija + transportēšana</div>
+        <div>▸ Montāžas laiks: 3–5 nedēļas no pamatu gatavības</div>
+        <div>▸ Garantija: 5 gadi konstrukcijai, 10 gadi paneļiem</div>
+        <div>▸ Ražots pēc normas PN-EN 14509 (CE marķējums)</div>
+        <div>▸ Cenas norādītas bez PVN</div>
+        <div>▸ Pamati un zemes darbi — nav iekļauti KP</div>
+      </div>
+    </div>
+
+    <!-- Footer contacts -->
+    <div style="margin-top:20px; display:flex; justify-content:space-between; align-items:center; padding-top:16px; border-top:2px solid #E8500A; flex-wrap:wrap; gap:12px;">
+      <div>
+        <div style="font-family:'Barlow Condensed',sans-serif; font-size:18px; font-weight:800; color:#1B3A6B;">S Panel SIA</div>
+        <div style="font-size:12px; color:#8a94b2; margin-top:2px;">Rīga · Tallinn · Viļņa</div>
+      </div>
+      <div style="font-size:12px; color:#4a5578; text-align:right; line-height:1.7;">
+        sell@s-panel.eu &nbsp;|&nbsp; +371 66 118 003 (LV) &nbsp;|&nbsp; +372 56 616 001 (EE)<br>
+        www.s-panel.lv
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ACTION BUTTONS -->
+<div style="max-width:900px; margin:16px auto 48px; display:flex; gap:12px; flex-wrap:wrap;">
+  <button onclick="copyToClipboard()" style="flex:1; min-width:180px; background:#1B3A6B; color:#fff; border:none; border-radius:6px; padding:14px 20px; font-family:'Barlow Condensed',sans-serif; font-size:15px; font-weight:700; letter-spacing:1px; cursor:pointer; text-transform:uppercase; transition:background .15s;" onmouseover="this.style.background='#2a4f8f'" onmouseout="this.style.background='#1B3A6B'">
+    📋 Kopēt tabulu (Excel)
+  </button>
+  <button onclick="window.print()" style="flex:1; min-width:180px; background:#E8500A; color:#fff; border:none; border-radius:6px; padding:14px 20px; font-family:'Barlow Condensed',sans-serif; font-size:15px; font-weight:700; letter-spacing:1px; cursor:pointer; text-transform:uppercase; transition:background .15s;" onmouseover="this.style.background='#ff6a25'" onmouseout="this.style.background='#E8500A'">
+    🖨 Drukāt / PDF
+  </button>
+  <button onclick="closeKP()" style="background:#f0f2f8; color:#4a5578; border:1.5px solid #dde2ef; border-radius:6px; padding:14px 20px; font-family:'Barlow Condensed',sans-serif; font-size:15px; font-weight:700; letter-spacing:1px; cursor:pointer; text-transform:uppercase;">
+    ✕ Aizvērt
+  </button>
+</div>`;
+
+  // Inject or replace KP block
+  const existing = document.getElementById('kp-wrapper');
+  if (existing) existing.remove();
+
+  const wrapper = document.createElement('div');
+  wrapper.id = 'kp-wrapper';
+  wrapper.innerHTML = kpHtml;
+  document.body.appendChild(wrapper);
+
+  // Scroll to KP
+  setTimeout(() => wrapper.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+}
+
+function closeKP() {
+  const el = document.getElementById('kp-wrapper');
+  if (el) el.remove();
+}
+
+function copyToClipboard() {
+  const table = document.getElementById('kp-table');
+  if (!table) return;
+
+  // Build TSV (tab-separated) for Excel paste
+  let tsv = '';
+  const rows = table.querySelectorAll('tr');
+  rows.forEach(row => {
+    const cells = row.querySelectorAll('th, td');
+    const line = Array.from(cells).map(c => c.innerText.trim().replace(/\t/g, ' ')).join('\t');
+    tsv += line + '\n';
+  });
+
+  navigator.clipboard.writeText(tsv).then(() => {
+    const btn = document.querySelector('button[onclick="copyToClipboard()"]');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '✅ Nokopēts! Ielīmēt Excel: Ctrl+V';
+    btn.style.background = '#0d9e6e';
+    setTimeout(() => { btn.innerHTML = orig; btn.style.background = '#1B3A6B'; }, 3000);
+  }).catch(() => {
+    // fallback: select table
+    const range = document.createRange();
+    range.selectNode(table);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+    document.execCommand('copy');
+    alert('Tabula atlasīta un nokopēta. Ielīmējiet Excel: Ctrl+V');
+  });
+}
+
+// Init
+buildThicknessOptions();
+updateWidthOptions();
+calc();
+</script>
+</body>
+</html>
